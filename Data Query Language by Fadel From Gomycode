@@ -1,0 +1,109 @@
+1-Pour créer les tables (partie DDL) ;
+
+CREATE TABLE Clients (
+    id INT PRIMARY KEY,
+    nom VARCHAR(100)
+);
+
+CREATE TABLE Produits (
+    id INT PRIMARY KEY,
+    nom VARCHAR(100),
+    prix DECIMAL(10,2)
+);
+
+CREATE TABLE Commandes (
+    id INT PRIMARY KEY,
+    id_client INT,
+    id_produit INT,
+    quantite INT,
+    FOREIGN KEY (id_client) REFERENCES Clients(id),
+    FOREIGN KEY (id_produit) REFERENCES Produits(id)
+);
+
+        2.Pour insérer des données dans vos tables (partie DML), vous pouvez utiliser la    syntaxe suivante (remplacez les valeurs par celles que vous souhaitez insérer) :
+  
+   
+       INSERT INTO Clients (id, nom) VALUES (1, 'Client 1');
+       INSERT INTO Produits (id, nom, prix) VALUES (1, 'Widget', 19.99);
+       INSERT INTO Commandes (id, id_client, id_produit, quantite) VALUES (1, 1, 1,  10);
+
+      3.Pour récupérer les noms des clients qui ont passé une commande d’au moins   un widget et d’au moins un gadget, ainsi que le coût total des widgets et gadgets commandés par chaque client :
+
+  SELECT C.nom, SUM(P.prix * CO.quantite) AS cout_total
+FROM Clients C
+JOIN Commandes CO ON C.id = CO.id_client
+JOIN Produits P ON CO.id_produit = P.id
+WHERE P.nom IN ('Widget', 'Gadget')
+GROUP BY C.nom
+HAVING COUNT(DISTINCT P.nom) = 2;
+
+4.Pour récupérer les noms des clients qui ont passé une commande pour au moins un widget, ainsi que le coût total des widgets commandés par chaque client :
+SELECT C.nom, SUM(P.prix * CO.quantite) AS cout_total
+FROM Clients C
+JOIN Commandes CO ON C.id = CO.id_client
+JOIN Produits P ON CO.id_produit = P.id
+WHERE P.nom = 'Widget'
+GROUP BY C.nom;
+
+5.Pour récupérer les noms des clients qui ont passé une commande pour au moins un gadget, ainsi que le coût total des gadgets commandés par chaque client :
+
+SELECT C.nom, SUM(P.prix * CO.quantite) AS cout_total
+FROM Clients C
+JOIN Commandes CO ON C.id = CO.id_client
+JOIN Produits P ON CO.id_produit = P.id
+WHERE P.nom = 'Gadget'
+GROUP BY C.nom;
+
+6.Pour récupérer les noms des clients qui ont passé une commande d’au moins un doohickey, ainsi que le coût total des doohickeys commandés par chaque client :
+
+SELECT C.nom, SUM(P.prix * CO.quantite) AS cout_total
+FROM Clients C
+JOIN Commandes CO ON C.id = CO.id_client
+JOIN Produits P ON CO.id_produit = P.id
+WHERE P.nom = 'Doohickey'
+GROUP BY C.nom;
+
+7.Pour récupérer le nombre total de widgets et de gadgets commandés par chaque client, ainsi que le coût total des commandes :
+
+SELECT C.nom, SUM(CASE WHEN P.nom = 'Widget' THEN CO.quantite ELSE 0 END) AS total_widgets,
+       SUM(CASE WHEN P.nom = 'Gadget' THEN CO.quantite ELSE 0 END) AS total_gadgets,
+       SUM(P.prix * CO.quantite) AS cout_total
+FROM Clients C
+JOIN Commandes CO ON C.id = CO.id_client
+JOIN Produits P ON CO.id_produit = P.id
+GROUP BY C.nom;
+
+8.Pour récupérer les noms des produits qui ont été commandés par au moins un client, ainsi que la quantité totale de chaque produit commandé :
+SELECT P.nom, SUM(CO.quantite) AS quantite_totale
+FROM Produits P
+JOIN Commandes CO ON P.id = CO.id_produit
+GROUP BY P.nom;
+
+9.Pour récupérer les noms des clients qui ont passé le plus de commandes, ainsi que le nombre total de commandes passées par chaque client :
+
+
+SELECT C.nom, COUNT(*) AS total_commandes
+FROM Clients C
+JOIN Commandes CO ON C.id = CO.id_client
+GROUP BY C.nom
+ORDER BY total_commandes DESC;
+
+10.Pour récupérer les noms des produits les plus commandés, ainsi que la quantité totale de chaque produit commandé :
+
+SELECT P.nom, SUM(CO.quantite) AS quantite_totale
+FROM Produits P
+JOIN Commandes CO ON P.id = CO.id_produit
+GROUP BY P.nom
+ORDER BY quantite_totale DESC;
+
+11.Pour récupérer les noms des clients qui ont passé une commande chaque jour de la semaine, ainsi que le nombre total de commandes passées par chaque client, vous auriez besoin d’une colonne pour le jour de la semaine dans la table des commandes. Si vous l’avez, la requête pourrait ressembler à ceci :
+
+
+SELECT C.nom, COUNT(*) AS total_commandes
+FROM Clients C
+JOIN Commandes CO ON C.id = CO.id_client
+WHERE CO.jour_semaine IN ('Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche')
+GROUP BY C.nom
+HAVING COUNT(DISTINCT CO.jour_semaine) = 7;
+
+
